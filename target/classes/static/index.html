@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Demo</title>
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width" />
+<base href="/" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h1>Login</h1>
+    <div class="container unauthenticated">
+    <form name='f' action="/auth-api/login" method='POST'>
+      <table>
+         <tr>
+            <td>User:</td>
+            <td><input type='text' name='username' value=''></td>
+         </tr>
+         <tr>
+            <td>Password:</td>
+            <td><input type='password' name='password' /></td>
+         </tr>
+         <tr>
+            <td><input name="submit" type="submit" value="submit" /></td>
+         </tr>
+      </table>
+  </form>
+        <div>
+            With Facebook: <a href="/auth-api/login/facebook">click here</a>
+        </div>
+        <div>
+            With Github: <a href="/auth-api/login/github">click here</a>
+        </div>
+    </div>
+    <div class="container authenticated" style="display: none">
+        Logged in as: <span id="user"></span>
+        <div>
+            <button onClick="logout()" class="btn btn-primary">Logout</button>
+        </div>
+    </div>
+    <script type="text/javascript" src="/webjars/js-cookie/js.cookie.js"></script>
+    <script type="text/javascript">
+        //   $.ajaxSetup({
+        //     beforeSend : function(xhr, settings) {
+        //       if (settings.type == 'POST' || settings.type == 'PUT'
+        //           || settings.type == 'DELETE') {
+        //         if (!(/^http:.*/.test(settings.url) || /^https:.*/
+        //             .test(settings.url))) {
+        //           // Only send the token to relative URLs i.e. locally.
+        //           xhr.setRequestHeader("X-XSRF-TOKEN", Cookies
+        //               .get('XSRF-TOKEN'));
+        //         }
+        //       }
+        //     }
+        //   });
+          $.get("/auth-api/user", function(data, status, xhr) {
+            console.log(data);
+            console.log(status);
+            console.log(xhr);
+            var name = null;
+            if (data.userAuthentication != null) {
+                name = data.userAuthentication.details.name;
+            } else {
+                name = data.name;
+            }
+            if (name != null) {
+                $("#user").html(name);
+                $(".unauthenticated").hide();
+                $(".authenticated").show();
+            }
+          });
+          var logout = function() {
+            $.post("/auth-api/logout", function() {
+              $("#user").html('');
+              $(".unauthenticated").show();
+              $(".authenticated").hide();
+            })
+            return true;
+          }
+         
+        </script>
+</body>
+</html>
