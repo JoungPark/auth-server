@@ -5,8 +5,10 @@ import com.joungpark.auth_server.filter.password.JWTAuthenticationFilter;
 import com.joungpark.auth_server.filter.password.JWTAuthorizationFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -34,7 +36,9 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		String signupPath = env.getProperty("signup.path");
 		// @formatter:off
 		http
-		.authorizeRequests()
+		.authorizeRequests().antMatchers("/login").permitAll()
+		.antMatchers("/oauth/token/revokeById/**").permitAll()
+		.antMatchers("/tokens/**").permitAll()
 		.antMatchers("/").permitAll()
 		.antMatchers("/auth/**").permitAll()
 		.antMatchers("/login/**").permitAll()
@@ -50,10 +54,11 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 			.csrf().disable();
 		// @formatter:on
 
-		http.addFilter(new JWTAuthenticationFilter(authenticationManager(), env))
-				.addFilter(new JWTAuthorizationFilter(authenticationManager(), env))
-				// .addFilterBefore(new JwtAuthenticationProcessingFilter("Authorization"), UsernamePasswordAuthenticationFilter.class)
-				.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),
+		http
+		.addFilter(new JWTAuthenticationFilter(authenticationManager(), env))
+		.addFilter(new JWTAuthorizationFilter(authenticationManager(), env))
+		// .addFilterBefore(new JwtAuthenticationProcessingFilter("Authorization"), UsernamePasswordAuthenticationFilter.class)
+		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),
 						UsernamePasswordAuthenticationFilter.class);
 	}
 
@@ -68,4 +73,10 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		// auth.inMemoryAuthentication().withUser("foo").password("1").roles("USER");
 		auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
 	}
+
+	@Override
+    @Bean
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
+    }
 }
