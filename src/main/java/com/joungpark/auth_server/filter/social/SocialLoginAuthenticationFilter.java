@@ -1,15 +1,17 @@
-package com.joungpark.auth_server.filter.password;
+package com.joungpark.auth_server.filter.social;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.AbstractAuthenticationProcessingFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -24,46 +26,36 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PasswordLoginAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class SocialLoginAuthenticationFilter extends AbstractAuthenticationProcessingFilter {
 
 	Environment env;
 
 	private AuthenticationManager authenticationManager;
 
-	public PasswordLoginAuthenticationFilter(AuthenticationManager authenticationManager, Environment env) {
+	public SocialLoginAuthenticationFilter(String defaultFilterProcessesUrl, String httpMethod, AuthenticationManager authenticationManager, Environment env) {
+		super(new AntPathRequestMatcher(defaultFilterProcessesUrl, httpMethod));
 		this.authenticationManager = authenticationManager;
 		this.env = env;
 	}
-
+	
+	String id = "";
+	
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest req, HttpServletResponse res)
 			throws AuthenticationException {
-		System.out.println("JWTAuthenticationFilter ");
-
-		String username = "";
-		String password = "";
-		String logintype = "";
+		System.out.println("SocialAuthenticationFilter ");
 
 		try {
-			username = req.getParameter("username");
-			password = req.getParameter("password");
-			logintype = req.getParameter("logintype");
+			id = req.getParameter("id");
 		} catch (Exception e) {
 			System.out.println(e);
 		}
 
-		// try {
-		// 	ApplicationUser creds = new ObjectMapper().readValue(req.getInputStream(), ApplicationUser.class);
-		// 	username = creds.getUsername();
-		// 	password = creds.getPassword();
-		// } catch (Exception e) {
-		// 	System.out.println(e);
-		// }
-		System.out.println("JWTAuthenticationFilter " + username + "  " + password + "  " + logintype);
-
-		if (!username.equals("")) {
+		System.out.println("SocialAuthenticationFilter " + id + " " + authenticationManager);
+		
+		if (!"".equals(id)) {
 			return authenticationManager
-				.authenticate(new UsernamePasswordAuthenticationToken(username, password, new ArrayList<>()));
+				.authenticate(new UsernamePasswordAuthenticationToken(id, id, new ArrayList<>()));
 		} else {
 			return null;
 		}

@@ -15,11 +15,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
-public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
+public class PasswordLoginAuthorizationFilter extends BasicAuthenticationFilter {
 
 	Environment env;
 
-	public JWTAuthorizationFilter(AuthenticationManager authManager, Environment env) {
+	public PasswordLoginAuthorizationFilter(AuthenticationManager authManager, Environment env) {
 		super(authManager);
 		this.env = env;
 	}

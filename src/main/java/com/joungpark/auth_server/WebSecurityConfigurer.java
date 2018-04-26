@@ -1,8 +1,9 @@
 package com.joungpark.auth_server;
 
 import com.joungpark.auth_server.filter.oauth2client.OAuth2ClientAuthenticationManager;
-import com.joungpark.auth_server.filter.password.JWTAuthenticationFilter;
-import com.joungpark.auth_server.filter.password.JWTAuthorizationFilter;
+import com.joungpark.auth_server.filter.password.PasswordLoginAuthenticationFilter;
+import com.joungpark.auth_server.filter.password.PasswordLoginAuthorizationFilter;
+import com.joungpark.auth_server.filter.social.SocialLoginAuthenticationFilter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +44,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		.antMatchers("/auth/**").permitAll()
 		.antMatchers("/login/**").permitAll()
 		.antMatchers(signupPath).permitAll()
+		.antMatchers("/users/sign-up-social").permitAll()
 		.anyRequest().authenticated()
 		.and()
 			.formLogin().permitAll()
@@ -55,8 +57,9 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		// @formatter:on
 
 		http
-		.addFilter(new JWTAuthenticationFilter(authenticationManager(), env))
-		.addFilter(new JWTAuthorizationFilter(authenticationManager(), env))
+		.addFilter(new PasswordLoginAuthenticationFilter(authenticationManager(), env))
+		.addFilter(new PasswordLoginAuthorizationFilter(authenticationManager(), env))
+		.addFilterAfter(new SocialLoginAuthenticationFilter("/login/social/facebook", "POST", authenticationManager(), env), UsernamePasswordAuthenticationFilter.class)
 		// .addFilterBefore(new JwtAuthenticationProcessingFilter("Authorization"), UsernamePasswordAuthenticationFilter.class)
 		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),
 						UsernamePasswordAuthenticationFilter.class);
