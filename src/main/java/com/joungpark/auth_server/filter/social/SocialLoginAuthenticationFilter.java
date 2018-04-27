@@ -4,7 +4,6 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -21,6 +20,8 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.joungpark.auth_server.filter.AuthInfo;
+import com.joungpark.auth_server.persistence.UserAccount;
+import com.joungpark.auth_server.persistence.UserAccountRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,10 +33,13 @@ public class SocialLoginAuthenticationFilter extends AbstractAuthenticationProce
 
 	private AuthenticationManager authenticationManager;
 
-	public SocialLoginAuthenticationFilter(String defaultFilterProcessesUrl, String httpMethod, AuthenticationManager authenticationManager, Environment env) {
+	private UserAccountRepository userAccountRepository;
+
+	public SocialLoginAuthenticationFilter(String defaultFilterProcessesUrl, String httpMethod, AuthenticationManager authenticationManager, Environment env, UserAccountRepository userAccountRepository) {
 		super(new AntPathRequestMatcher(defaultFilterProcessesUrl, httpMethod));
 		this.authenticationManager = authenticationManager;
 		this.env = env;
+		this.userAccountRepository = userAccountRepository;
 	}
 	
 	String id = "";
@@ -68,8 +72,13 @@ public class SocialLoginAuthenticationFilter extends AbstractAuthenticationProce
 //		String headerString = env.getProperty("jwt-token.headerString");
 		String tokenPrefix = env.getProperty("jwt-token.tokenPrefix");
 
+		String username = ((User) auth.getPrincipal()).getUsername();
+		UserAccount userAccount = userAccountRepository.findByUsername(username);
+		Long userId = userAccount.getId();
+		
 		String accessToken = Jwts.builder()
-			.setSubject(((User) auth.getPrincipal()).getUsername())
+				.claim("user_id", userId)
+			.setSubject(username)
 			.setExpiration(new Date(System.currentTimeMillis() + expirationTime))
 			.signWith(SignatureAlgorithm.HS512, secretkey.getBytes()).compact();
 		

@@ -4,6 +4,7 @@ import com.joungpark.auth_server.filter.oauth2client.OAuth2ClientAuthenticationM
 import com.joungpark.auth_server.filter.password.PasswordLoginAuthenticationFilter;
 import com.joungpark.auth_server.filter.password.PasswordLoginAuthorizationFilter;
 import com.joungpark.auth_server.filter.social.SocialLoginAuthenticationFilter;
+import com.joungpark.auth_server.persistence.UserAccountRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +31,8 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 	private UserDetailsService userDetailsService;
 	@Autowired
 	private BCryptPasswordEncoder bCryptPasswordEncoder;
-
+	@Autowired
+	private UserAccountRepository userAccountRepository;
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
@@ -57,12 +59,12 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		// @formatter:on
 
 		http
-		.addFilter(new PasswordLoginAuthenticationFilter(authenticationManager(), env))
+		.addFilter(new PasswordLoginAuthenticationFilter(authenticationManager(), env, userAccountRepository))
 		.addFilter(new PasswordLoginAuthorizationFilter(authenticationManager(), env))
-		.addFilterAfter(new SocialLoginAuthenticationFilter("/login/social/facebook", "POST", authenticationManager(), env), UsernamePasswordAuthenticationFilter.class)
+		.addFilterAfter(new SocialLoginAuthenticationFilter("/login/social/facebook", "POST", authenticationManager(), env, userAccountRepository), UsernamePasswordAuthenticationFilter.class)
 		// .addFilterBefore(new JwtAuthenticationProcessingFilter("Authorization"), UsernamePasswordAuthenticationFilter.class)
-		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),
-						UsernamePasswordAuthenticationFilter.class);
+//		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),	UsernamePasswordAuthenticationFilter.class)
+		;
 	}
 
 	@Override
@@ -72,7 +74,7 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		//		super.configure(auth);		// must make it remarked
+		// super.configure(auth);		// must make it remarked
 		// auth.inMemoryAuthentication().withUser("foo").password("1").roles("USER");
 		auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
 	}

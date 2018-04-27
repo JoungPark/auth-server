@@ -19,6 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.joungpark.auth_server.filter.AuthInfo;
+import com.joungpark.auth_server.persistence.SocialAccountInfo;
+import com.joungpark.auth_server.persistence.UserAccount;
+import com.joungpark.auth_server.persistence.UserAccountRepository;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,10 +32,13 @@ public class PasswordLoginAuthenticationFilter extends UsernamePasswordAuthentic
 	Environment env;
 
 	private AuthenticationManager authenticationManager;
-
-	public PasswordLoginAuthenticationFilter(AuthenticationManager authenticationManager, Environment env) {
+	
+	private UserAccountRepository userAccountRepository;
+	
+	public PasswordLoginAuthenticationFilter(AuthenticationManager authenticationManager, Environment env, UserAccountRepository userAccountRepository) {
 		this.authenticationManager = authenticationManager;
 		this.env = env;
+		this.userAccountRepository = userAccountRepository;
 	}
 
 	@Override
@@ -51,7 +57,7 @@ public class PasswordLoginAuthenticationFilter extends UsernamePasswordAuthentic
 		} catch (Exception e) {
 			System.out.println(e);
 		}
-
+		
 		// try {
 		// 	ApplicationUser creds = new ObjectMapper().readValue(req.getInputStream(), ApplicationUser.class);
 		// 	username = creds.getUsername();
@@ -76,7 +82,18 @@ public class PasswordLoginAuthenticationFilter extends UsernamePasswordAuthentic
 //		String headerString = env.getProperty("jwt-token.headerString");
 		String tokenPrefix = env.getProperty("jwt-token.tokenPrefix");
 
+		String username = ((User) auth.getPrincipal()).getUsername();
+		UserAccount userAccount = userAccountRepository.findByUsername(username);
+		Long userId = userAccount.getId();
+		SocialAccountInfo socialAccountInfo = userAccount.getSocialAccountInfo();
+		String displayusername= username;
+		if (socialAccountInfo != null) {
+			displayusername = userAccount.getSocialAccountInfo().getName();
+		}
+		System.out.println(userId);
 		String accessToken = Jwts.builder()
+			.claim("userId", userId)
+			.claim("displayusername", displayusername)
 			.setSubject(((User) auth.getPrincipal()).getUsername())
 			.setExpiration(new Date(System.currentTimeMillis() + expirationTime))
 			.signWith(SignatureAlgorithm.HS512, secretkey.getBytes()).compact();
