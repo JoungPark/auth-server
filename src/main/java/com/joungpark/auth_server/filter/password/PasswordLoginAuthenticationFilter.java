@@ -82,14 +82,11 @@ public class PasswordLoginAuthenticationFilter extends UsernamePasswordAuthentic
 //		String headerString = env.getProperty("jwt-token.headerString");
 		String tokenPrefix = env.getProperty("jwt-token.tokenPrefix");
 
-		String username = ((User) auth.getPrincipal()).getUsername();
-		UserAccount userAccount = userAccountRepository.findByUsername(username);
-		Long userId = userAccount.getId();
-		SocialAccountInfo socialAccountInfo = userAccount.getSocialAccountInfo();
-		String displayusername= username;
-		if (socialAccountInfo != null) {
-			displayusername = userAccount.getSocialAccountInfo().getName();
-		}
+		String loginUserName = ((User) auth.getPrincipal()).getUsername();
+		UserAccount userAccount = userAccountRepository.findByLoginUserName(loginUserName);
+		Long userId = userAccount.getUserId();
+		String displayusername= userAccount.getDisplayName();
+		
 		System.out.println(userId);
 		String accessToken = Jwts.builder()
 			.claim("userId", userId)

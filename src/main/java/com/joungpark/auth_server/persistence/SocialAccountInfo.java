@@ -24,7 +24,7 @@ public class SocialAccountInfo {
     private String provider;
     
     @OneToOne(cascade=CascadeType.ALL)
-    @JoinColumn(name="user_account_id")
+    @JoinColumn(name="user_id")
     private UserAccount userAccount;
 
 	public long getId() {

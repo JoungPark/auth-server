@@ -72,13 +72,16 @@ public class SocialLoginAuthenticationFilter extends AbstractAuthenticationProce
 //		String headerString = env.getProperty("jwt-token.headerString");
 		String tokenPrefix = env.getProperty("jwt-token.tokenPrefix");
 
-		String username = ((User) auth.getPrincipal()).getUsername();
-		UserAccount userAccount = userAccountRepository.findByUsername(username);
-		Long userId = userAccount.getId();
+		String loginUserName = ((User) auth.getPrincipal()).getUsername();
+		UserAccount userAccount = userAccountRepository.findByLoginUserName(loginUserName);
+		Long userId = userAccount.getUserId();
+		String displayusername= userAccount.getDisplayName();
 		
+		System.out.println(userId);
 		String accessToken = Jwts.builder()
-				.claim("user_id", userId)
-			.setSubject(username)
+			.claim("userId", userId)
+			.claim("displayusername", displayusername)
+			.setSubject(((User) auth.getPrincipal()).getUsername())
 			.setExpiration(new Date(System.currentTimeMillis() + expirationTime))
 			.signWith(SignatureAlgorithm.HS512, secretkey.getBytes()).compact();
 		
@@ -87,14 +90,9 @@ public class SocialLoginAuthenticationFilter extends AbstractAuthenticationProce
 		authInfo.setTokenType(tokenPrefix);
 		ObjectWriter ow = new ObjectMapper().writer().withDefaultPrettyPrinter();
 		String json = ow.writeValueAsString(authInfo);
-		
-		res.setStatus(HttpServletResponse.SC_OK);
 
-		// res.getWriter().write(tokenPrefix + accessToken);
 		res.getWriter().write(json);
 		res.getWriter().flush();
-		// res.getWriter().close();
-		// res.addHeader(headerString, tokenPrefix + token);
 
 		super.successfulAuthentication(req, res, chain, auth);
 	}

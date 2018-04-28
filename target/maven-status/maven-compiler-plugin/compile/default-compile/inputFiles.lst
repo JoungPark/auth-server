@@ -6,6 +6,7 @@ D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\Aut
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\WebSecurityConfigurer.java
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\filter\password\PasswordLoginAuthenticationFilter.java
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\filter\social\SocialLoginAuthenticationFilter.java
+D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\controller\PasswordUser.java
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\filter\AuthInfo.java
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\filter\password\PasswordLoginAuthorizationFilter.java
 D:\workspace\jp-homepage\auth-server\src\main\java\com\joungpark\auth_server\controller\OAuthClientController.java

@@ -24,9 +24,16 @@ public class UserController {
 	}
 
 	@PostMapping("/sign-up")
-	public void signUp(@RequestBody UserAccount userAccount) {
-		System.out.println("signUp " + userAccount);
-		userAccount.setPassword(bCryptPasswordEncoder.encode(userAccount.getPassword()));
+	public void signUp(@RequestBody PasswordUser passwordUser) {
+		System.out.println("signUp " + passwordUser);
+
+		UserAccount userAccount = new UserAccount();
+		
+		userAccount.setUserId(System.currentTimeMillis());
+		userAccount.setLoginUserName(passwordUser.getEmail());
+		userAccount.setPassword(bCryptPasswordEncoder.encode(passwordUser.getPassword()));
+		userAccount.setDisplayName(passwordUser.getName());
+
 		userAccountRepository.save(userAccount);
 	}
 
@@ -35,8 +42,11 @@ public class UserController {
 		System.out.println("signUp social " + socialUser);
 
 		UserAccount userAccount = new UserAccount();
-		userAccount.setUsername(socialUser.getId());
+		
+		userAccount.setUserId(System.currentTimeMillis());
+		userAccount.setLoginUserName(socialUser.getId());
 		userAccount.setPassword(bCryptPasswordEncoder.encode(socialUser.getId()));
+		userAccount.setDisplayName(socialUser.getName());
 		
 		SocialAccountInfo socialAccountInfo = new SocialAccountInfo();
 		socialAccountInfo.setEmail(socialUser.getEmail());
@@ -47,7 +57,10 @@ public class UserController {
 		socialAccountInfo.setUserAccount(userAccount);
 		userAccount.setSocialAccountInfo(socialAccountInfo);
 		
-		userAccountRepository.save(userAccount);
-		
+		try {
+			userAccountRepository.save(userAccount);
+		} catch (Exception e) {
+			System.out.println(e);
+		}
 	}
 }

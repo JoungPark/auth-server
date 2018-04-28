@@ -18,13 +18,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 	public UserDetailsServiceImpl(UserAccountRepository userAccountRepository) {
 		this.userAccountRepository = userAccountRepository;
 	}
-
+	
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		UserAccount appUser = userAccountRepository.findByUsername(username);
+		UserAccount appUser = userAccountRepository.findByLoginUserName(username);
 		if (appUser == null) {
 			throw new UsernameNotFoundException(username);
 		}
-		return new User(appUser.getUsername(), appUser.getPassword(), emptyList());
+		return new User(appUser.getLoginUserName(), appUser.getPassword(), emptyList());
 	}
 }
