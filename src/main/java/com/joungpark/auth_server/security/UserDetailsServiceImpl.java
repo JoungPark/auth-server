@@ -1,5 +1,7 @@
 package com.joungpark.auth_server.security;
 
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,6 +12,8 @@ import com.joungpark.auth_server.persistence.UserAccount;
 import com.joungpark.auth_server.persistence.UserAccountRepository;
 
 import static java.util.Collections.emptyList;
+
+import java.util.Arrays;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -25,6 +29,11 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		if (appUser == null) {
 			throw new UsernameNotFoundException(username);
 		}
-		return new User(appUser.getLoginUserName(), appUser.getPassword(), emptyList());
+		
+		// @TODO 
+		GrantedAuthority authority = new SimpleGrantedAuthority("USER");
+		
+		// return new User(appUser.getLoginUserName(), appUser.getPassword(), emptyList());
+		return new User(appUser.getLoginUserName(), appUser.getPassword(), Arrays.asList(authority));
 	}
 }

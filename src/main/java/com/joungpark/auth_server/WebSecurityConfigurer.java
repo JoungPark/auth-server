@@ -36,10 +36,11 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		String signupPath = env.getProperty("signup.path");
+		// String signupPath = env.getProperty("signup.path");
 		// @formatter:off
 		http
-		.authorizeRequests().antMatchers("/login").permitAll()
+		.authorizeRequests()
+		.antMatchers("/login").permitAll()
 		.antMatchers("/oauth/token/revokeById/**").permitAll()
 		.antMatchers("/tokens/**").permitAll()
 		.antMatchers("/").permitAll()
@@ -58,11 +59,11 @@ public class WebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 		// @formatter:on
 
 		http
-		.addFilter(new PasswordLoginAuthenticationFilter(authenticationManager(), env, userAccountRepository))
-		.addFilter(new PasswordLoginAuthorizationFilter(authenticationManager(), env))
+		// .addFilter(new PasswordLoginAuthenticationFilter(authenticationManager(), env, userAccountRepository))
+		// .addFilter(new PasswordLoginAuthorizationFilter(authenticationManager(), env))
 		.addFilterAfter(new SocialLoginAuthenticationFilter("/login/social/facebook", "POST", authenticationManager(), env, userAccountRepository), UsernamePasswordAuthenticationFilter.class)
 		// .addFilterBefore(new JwtAuthenticationProcessingFilter("Authorization"), UsernamePasswordAuthenticationFilter.class)
-//		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),	UsernamePasswordAuthenticationFilter.class)
+		.addFilterAfter(oAuth2ClientAuthenticationManager.getJwtFacebookFilter("/login/facebook", env),	UsernamePasswordAuthenticationFilter.class)
 		;
 	}
 
